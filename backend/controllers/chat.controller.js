@@ -1,4 +1,4 @@
-const { buildMockSalesReply } = require("../services/chat.service");
+const { generateSalesReply } = require("../services/chat.service");
 const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 
@@ -44,7 +44,7 @@ const postChat = asyncHandler(async (req, res) => {
   }
 
   const normalizedHistory = validateHistory(history);
-  const result = buildMockSalesReply({
+  const result = await generateSalesReply({
     message,
     history: normalizedHistory
   });

@@ -1,15 +1,91 @@
-const buildMockSalesReply = ({ message, history = [] }) => {
-  const trimmedMessage = message.trim();
-  const recentTurns = history.slice(-5);
+const OpenAI = require("openai");
+
+const AppError = require("../utils/appError");
+
+const SALES_AGENT_SYSTEM_PROMPT = `You are a high-converting AI sales agent for a stock market education platform.
+
+Your goals:
+- Understand user intent
+- Answer questions clearly
+- Handle objections persuasively
+- Build trust using logic + examples + social proof
+- Guide user toward conversion (buy course / book call)
+
+Tone:
+- Friendly, confident, non-pushy
+- Mix Hinglish if needed (Indian audience)
+
+Rules:
+- Always use provided context
+- If objection -> handle it like a sales expert
+- If user shows buying intent -> push CTA
+- If unsure -> ask clarifying question`;
+
+let openaiClient;
+
+const getOpenAIClient = () => {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new AppError(
+      "OPENAI_API_KEY is missing. Add it to your backend .env file before using /api/chat.",
+      500
+    );
+  }
+
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+  }
+
+  return openaiClient;
+};
+
+const buildChatMessages = ({ message, history = [] }) => {
+  const recentTurns = history.slice(-10);
+
+  return [
+    {
+      role: "system",
+      content: SALES_AGENT_SYSTEM_PROMPT
+    },
+    ...recentTurns,
+    {
+      role: "user",
+      content: message.trim()
+    }
+  ];
+};
+
+const generateSalesReply = async ({ message, history = [] }) => {
+  const client = getOpenAIClient();
+  const chatMessages = buildChatMessages({ message, history });
+  const model = process.env.OPENAI_CHAT_MODEL || "gpt-4.1-mini";
+
+  const completion = await client.chat.completions.create({
+    model,
+    messages: chatMessages,
+    temperature: 0.7
+  });
+
+  const assistantMessage = completion.choices?.[0]?.message?.content?.trim();
+
+  if (!assistantMessage) {
+    throw new AppError("OpenAI returned an empty response.", 502);
+  }
 
   return {
-    reply: `Thanks for your question. You said: "${trimmedMessage}". I am using a placeholder sales response for now. In the next step, this will be replaced with a real OpenAI-generated reply.`,
+    reply: assistantMessage,
     usage: {
-      historyMessagesUsed: recentTurns.length
+      model,
+      promptTokens: completion.usage?.prompt_tokens || 0,
+      completionTokens: completion.usage?.completion_tokens || 0,
+      totalTokens: completion.usage?.total_tokens || 0,
+      historyMessagesUsed: history.slice(-10).length
     }
   };
 };
 
 module.exports = {
-  buildMockSalesReply
+  SALES_AGENT_SYSTEM_PROMPT,
+  generateSalesReply
 };
