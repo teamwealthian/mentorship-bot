@@ -2,7 +2,7 @@ function ChatComposer({ canSend, input, isLoading, onChange, onSubmit }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="border-t border-slate-200 bg-white/90 px-4 py-3 backdrop-blur sm:px-6"
+      className="sticky bottom-0 z-10 shrink-0 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6"
     >
       <div className="flex items-center gap-3 rounded-full border border-slate-300 bg-white px-4 py-2 shadow-sm">
         <input

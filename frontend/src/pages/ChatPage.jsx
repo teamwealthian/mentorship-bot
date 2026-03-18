@@ -33,11 +33,11 @@ function ChatPage() {
   }
 
   return (
-    <main className="flex min-h-screen bg-slate-200/40">
+    <main className="flex h-screen overflow-hidden bg-slate-200/40">
       <MentorSidebar />
 
-      <section className="flex min-h-screen flex-1 flex-col bg-[#f7f5ef]">
-        <header className="border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-6">
+      <section className="flex min-h-0 flex-1 flex-col bg-[#f7f5ef]">
+        <header className="shrink-0 border-b border-slate-200 bg-white/80 px-4 py-4 backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
               KK
@@ -51,7 +51,7 @@ function ChatPage() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
             {messages.map((message, index) => (
               <div key={message.id}>
