@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 import ChatComposer from '../components/ChatComposer'
 import ChatMessage from '../components/ChatMessage'
 import MentorSidebar from '../components/MentorSidebar'
@@ -5,8 +7,25 @@ import QuickReplyButtons from '../components/QuickReplyButtons'
 import { useChat } from '../hooks/useChat'
 
 function ChatPage() {
-  const { canSend, error, input, isLoading, messages, quickReplies, sendMessage, setInput } =
-    useChat()
+  const {
+    canSend,
+    error,
+    input,
+    isLoading,
+    messages,
+    quickReplies,
+    sendMessage,
+    setInput,
+    showQuickReplies,
+  } = useChat()
+  const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    })
+  }, [isLoading, messages])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -38,7 +57,7 @@ function ChatPage() {
               <div key={message.id}>
                 <ChatMessage role={message.role} content={message.content} />
 
-                {index === 2 && (
+                {index === 2 && showQuickReplies && (
                   <div className="mt-3">
                     <QuickReplyButtons options={quickReplies} onSelect={sendMessage} />
                   </div>
@@ -59,6 +78,8 @@ function ChatPage() {
                 {error}
               </div>
             )}
+
+            <div ref={messagesEndRef} />
           </div>
         </div>
 

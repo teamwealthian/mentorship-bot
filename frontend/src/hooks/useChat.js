@@ -1,4 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+
+const STORAGE_KEY = 'ai-sales-chat-messages'
 
 const INITIAL_MESSAGES = [
   {
@@ -21,8 +23,43 @@ const INITIAL_MESSAGES = [
 
 const QUICK_REPLIES = ['Hindi', 'English']
 
+const normalizeStoredMessages = (value) => {
+  if (!Array.isArray(value)) {
+    return INITIAL_MESSAGES
+  }
+
+  const normalizedMessages = value
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => ({
+      id: typeof item.id === 'string' && item.id ? item.id : crypto.randomUUID(),
+      role: item.role === 'user' ? 'user' : 'assistant',
+      content: typeof item.content === 'string' ? item.content.trim() : '',
+    }))
+    .filter((item) => item.content)
+
+  return normalizedMessages.length > 0 ? normalizedMessages : INITIAL_MESSAGES
+}
+
+const getInitialMessages = () => {
+  if (typeof window === 'undefined') {
+    return INITIAL_MESSAGES
+  }
+
+  try {
+    const storedMessages = window.localStorage.getItem(STORAGE_KEY)
+
+    if (!storedMessages) {
+      return INITIAL_MESSAGES
+    }
+
+    return normalizeStoredMessages(JSON.parse(storedMessages))
+  } catch {
+    return INITIAL_MESSAGES
+  }
+}
+
 export function useChat() {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES)
+  const [messages, setMessages] = useState(getInitialMessages)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
@@ -31,6 +68,14 @@ export function useChat() {
     () => input.trim().length > 0 && !isLoading,
     [input, isLoading],
   )
+  const showQuickReplies = useMemo(
+    () => messages.every((message) => message.role === 'assistant'),
+    [messages],
+  )
+
+  useEffect(() => {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+  }, [messages])
 
   const sendMessage = async (draft) => {
     const content = draft.trim()
@@ -51,6 +96,11 @@ export function useChat() {
     setInput('')
 
     try {
+      const history = messages.slice(-10).map(({ role, content: messageContent }) => ({
+        role,
+        content: messageContent,
+      }))
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -58,6 +108,7 @@ export function useChat() {
         },
         body: JSON.stringify({
           message: content,
+          history,
         }),
       })
 
@@ -91,5 +142,6 @@ export function useChat() {
     quickReplies: QUICK_REPLIES,
     sendMessage,
     setInput,
+    showQuickReplies,
   }
 }
