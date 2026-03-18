@@ -14,8 +14,9 @@ function AdminKnowledgeForm({
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-slate-900">Train the sales bot</h2>
         <p className="mt-2 text-sm leading-6 text-slate-500">
-          Add product knowledge, FAQs, objections, scripts, and testimonials. In the
-          next step, these submissions will be stored in MongoDB and indexed in Pinecone.
+          Add product knowledge, FAQs, objections, scripts, and testimonials. Each
+          submission is stored in MongoDB, chunked, embedded, and sent to Pinecone for
+          retrieval.
         </p>
       </div>
 
@@ -99,6 +100,16 @@ function AdminKnowledgeForm({
             <p>
               <span className="font-medium text-slate-800">Created:</span>{' '}
               {lastSubmission.createdAt}
+            </p>
+            <p>
+              <span className="font-medium text-slate-800">Chunks created:</span>{' '}
+              {lastSubmission.chunksCreated}
+            </p>
+            <p>
+              <span className="font-medium text-slate-800">Pinecone indexing:</span>{' '}
+              {lastSubmission.vectorUpsert?.enabled
+                ? `${lastSubmission.vectorUpsert.upsertedCount} chunk(s) upserted`
+                : 'Skipped because Pinecone is not configured'}
             </p>
           </div>
         </div>

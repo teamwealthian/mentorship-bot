@@ -48,7 +48,35 @@ const queryKnowledgeMatches = async ({ embedding, topK, minScore }) => {
   };
 };
 
+const upsertKnowledgeVectors = async (records) => {
+  const index = getPineconeIndex();
+
+  if (!index) {
+    return {
+      enabled: false,
+      upsertedCount: 0
+    };
+  }
+
+  if (!Array.isArray(records) || records.length === 0) {
+    return {
+      enabled: true,
+      upsertedCount: 0
+    };
+  }
+
+  await index.upsert({
+    records
+  });
+
+  return {
+    enabled: true,
+    upsertedCount: records.length
+  };
+};
+
 module.exports = {
   hasVectorConfig,
-  queryKnowledgeMatches
+  queryKnowledgeMatches,
+  upsertKnowledgeVectors
 };
