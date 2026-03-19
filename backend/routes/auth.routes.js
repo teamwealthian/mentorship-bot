@@ -1,11 +1,11 @@
 const express = require("express");
 
-const { addKnowledge } = require("../controllers/admin.controller");
+const { getCurrentAdmin, login } = require("../controllers/auth.controller");
 const { requireAdminAuth } = require("../middleware/auth.middleware");
 
 const router = express.Router();
 
-router.use(requireAdminAuth);
-router.post("/add-knowledge", addKnowledge);
+router.post("/login", login);
+router.get("/me", requireAdminAuth, getCurrentAdmin);
 
 module.exports = router;

@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 
 import AdminKnowledgeForm from '../components/AdminKnowledgeForm'
+import { useAdminAuth } from '../context/useAdminAuth'
 import { useAdminKnowledge } from '../hooks/useAdminKnowledge'
 
 function AdminPage() {
+  const { logout, user } = useAdminAuth()
   const {
     error,
     form,
@@ -29,14 +31,26 @@ function AdminPage() {
               Use this screen to teach the AI sales agent about your product, FAQs,
               objections, and testimonials.
             </p>
+            <p className="mt-3 text-sm text-slate-500">
+              Signed in as <span className="font-medium text-slate-800">{user?.username}</span>
+            </p>
           </div>
 
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-900"
-          >
-            Back to chat
-          </Link>
+          <div className="flex flex-col gap-3 sm:items-end">
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-900"
+            >
+              Back to chat
+            </Link>
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:text-slate-900"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         <AdminKnowledgeForm
