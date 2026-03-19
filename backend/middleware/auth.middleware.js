@@ -1,6 +1,7 @@
 const { JsonWebTokenError, TokenExpiredError } = require("jsonwebtoken");
 
-const { verifyAdminToken } = require("../services/auth.service");
+const { getAuthenticatedAdminFromToken } = require("../services/auth.service");
+const asyncHandler = require("../utils/asyncHandler");
 const AppError = require("../utils/appError");
 
 const extractBearerToken = (authorizationHeader) => {
@@ -17,33 +18,25 @@ const extractBearerToken = (authorizationHeader) => {
   return token;
 };
 
-const requireAdminAuth = (req, _res, next) => {
+const requireAdminAuth = asyncHandler(async (req, _res, next) => {
+  const token = extractBearerToken(req.headers.authorization);
+
   try {
-    const token = extractBearerToken(req.headers.authorization);
-    const payload = verifyAdminToken(token);
-
-    if (payload.role !== "admin" || !payload.username) {
-      throw new AppError("You do not have access to this resource.", 403);
-    }
-
-    req.user = {
-      role: payload.role,
-      username: payload.username
-    };
-
-    next();
+    req.user = await getAuthenticatedAdminFromToken(token);
   } catch (error) {
     if (error instanceof TokenExpiredError) {
-      return next(new AppError("Your admin session has expired. Please sign in again.", 401));
+      throw new AppError("Your admin session has expired. Please sign in again.", 401);
     }
 
     if (error instanceof JsonWebTokenError) {
-      return next(new AppError("Invalid admin token.", 401));
+      throw new AppError("Invalid admin token.", 401);
     }
 
-    return next(error);
+    throw error;
   }
-};
+
+  next();
+});
 
 module.exports = {
   requireAdminAuth
