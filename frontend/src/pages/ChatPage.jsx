@@ -40,6 +40,7 @@ const createPreferredLanguageKey = (courseTitle) =>
 function ChatExperience({ courseTitle, onStartOver, preferredLanguage }) {
   const {
     canSend,
+    composerEnabled,
     error,
     input,
     isIntroTyping,
@@ -47,6 +48,8 @@ function ChatExperience({ courseTitle, onStartOver, preferredLanguage }) {
     isReplyTyping,
     messages,
     quickReplies,
+    scriptOptions,
+    selectScriptOption,
     sendMessage,
     setInput,
     showQuickReplies,
@@ -106,15 +109,9 @@ function ChatExperience({ courseTitle, onStartOver, preferredLanguage }) {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div key={message.id}>
                 <ChatMessage role={message.role} content={message.content} />
-
-                {index === 2 && showQuickReplies && (
-                  <div className="chat-message-enter mt-3">
-                    <QuickReplyButtons options={quickReplies} onSelect={sendMessage} />
-                  </div>
-                )}
               </div>
             ))}
 
@@ -131,6 +128,18 @@ function ChatExperience({ courseTitle, onStartOver, preferredLanguage }) {
               </div>
             )}
 
+            {scriptOptions.length > 0 && (
+              <div className="chat-message-enter flex justify-end">
+                <QuickReplyButtons options={scriptOptions} onSelect={selectScriptOption} />
+              </div>
+            )}
+
+            {showQuickReplies && (
+              <div className="chat-message-enter mt-3">
+                <QuickReplyButtons options={quickReplies} onSelect={sendMessage} />
+              </div>
+            )}
+
             {error && (
               <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 {error}
@@ -141,13 +150,15 @@ function ChatExperience({ courseTitle, onStartOver, preferredLanguage }) {
           </div>
         </div>
 
-        <ChatComposer
-          canSend={canSend}
-          input={input}
-          isLoading={isLoading}
-          onChange={setInput}
-          onSubmit={handleSubmit}
-        />
+        {composerEnabled ? (
+          <ChatComposer
+            canSend={canSend}
+            input={input}
+            isLoading={isLoading}
+            onChange={setInput}
+            onSubmit={handleSubmit}
+          />
+        ) : null}
       </section>
     </main>
   )
