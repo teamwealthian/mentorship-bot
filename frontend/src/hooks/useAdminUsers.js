@@ -1,20 +1,20 @@
 import { useState } from 'react'
 
-import { KNOWLEDGE_TYPE_OPTIONS } from '../constants/knowledgeTypes'
 import { useAdminAuth } from '../context/useAdminAuth'
 
 const INITIAL_FORM = {
-  type: KNOWLEDGE_TYPE_OPTIONS[0].value,
-  content: '',
+  confirmPassword: '',
+  email: '',
+  password: '',
 }
 
-export function useAdminKnowledge() {
+export function useAdminUsers() {
   const { logout, token } = useAdminAuth()
   const [form, setForm] = useState(INITIAL_FORM)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
-  const [lastSubmission, setLastSubmission] = useState(null)
+  const [lastCreatedAdmin, setLastCreatedAdmin] = useState(null)
 
   const updateField = (field, value) => {
     setForm((current) => ({
@@ -23,14 +23,20 @@ export function useAdminKnowledge() {
     }))
   }
 
-  const submitKnowledge = async () => {
+  const submitAdminUser = async () => {
     const payload = {
-      type: form.type.trim(),
-      content: form.content.trim(),
+      email: form.email.trim(),
+      password: form.password.trim(),
     }
 
-    if (!payload.content) {
-      setError('Knowledge content is required.')
+    if (!payload.email || !payload.password) {
+      setError('Email and password are required.')
+      setSuccessMessage('')
+      return
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match.')
       setSuccessMessage('')
       return
     }
@@ -40,7 +46,7 @@ export function useAdminKnowledge() {
     setSuccessMessage('')
 
     try {
-      const response = await fetch('/api/admin/add-knowledge', {
+      const response = await fetch('/api/auth/admin-users', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -57,11 +63,11 @@ export function useAdminKnowledge() {
       }
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to add knowledge.')
+        throw new Error(data.message || 'Failed to create admin user.')
       }
 
-      setSuccessMessage(data.message || 'Knowledge submitted successfully.')
-      setLastSubmission(data.data || null)
+      setSuccessMessage(data.message || 'Admin user created successfully.')
+      setLastCreatedAdmin(data.data?.user || null)
       setForm(INITIAL_FORM)
     } catch (requestError) {
       setError(requestError.message)
@@ -74,9 +80,9 @@ export function useAdminKnowledge() {
     error,
     form,
     isSubmitting,
-    lastSubmission,
+    lastCreatedAdmin,
+    submitAdminUser,
     successMessage,
-    submitKnowledge,
     updateField,
   }
 }

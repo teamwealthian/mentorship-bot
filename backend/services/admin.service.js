@@ -1,4 +1,5 @@
 const AppError = require("../utils/appError");
+const mongoose = require("mongoose");
 const Knowledge = require("../models/knowledge.model");
 const { createEmbedding } = require("./embedding.service");
 const { upsertKnowledgeVectors } = require("./vector.service");
@@ -20,7 +21,14 @@ const saveKnowledge = async ({ type, content }) => {
   if (!process.env.MONGODB_URI) {
     throw new AppError(
       "MONGODB_URI is missing. Add MongoDB configuration to enable admin knowledge saving.",
-      500
+      503
+    );
+  }
+
+  if (mongoose.connection.readyState !== 1) {
+    throw new AppError(
+      "MongoDB is currently unavailable. Admin knowledge saving is temporarily unavailable.",
+      503
     );
   }
 

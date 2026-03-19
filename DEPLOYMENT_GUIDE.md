@@ -149,6 +149,8 @@ PORT=5001
 NODE_ENV=production
 CORS_ORIGIN=http://YOUR_ELASTIC_IP
 MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=generate_a_long_random_secret_here
+JWT_EXPIRES_IN=12h
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_CHAT_MODEL=gpt-4.1-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-large
@@ -163,7 +165,28 @@ Notes:
 
 - If you later use a domain with HTTPS, update `CORS_ORIGIN` to `https://yourdomain.com`
 - Keep `.env` private
-- If `MONGODB_URI` is missing, the backend may still start, but admin knowledge saving may not work correctly
+- Use a long, random `JWT_SECRET` in production and rotate it if it is ever exposed
+- Admin users are stored in MongoDB with hashed passwords
+- If `MONGODB_URI` is missing or MongoDB is unreachable, the backend can still serve public chat, but admin features will be unavailable
+
+## Admin Access
+
+The public website keeps `/` open for the chat experience. The internal admin console is no longer linked from the public home page.
+
+To access the admin console after deployment:
+
+1. Open `http://YOUR_ELASTIC_IP/admin/login`
+2. If this is a fresh deployment with no admin users yet, create the first admin account using the bootstrap form
+3. Otherwise, sign in with the admin email and password stored in MongoDB
+4. The frontend stores a JWT and sends it on `/api/admin/*` requests
+5. Existing admins can create additional admin users directly from the protected admin console
+
+If you change `JWT_SECRET` or any backend environment variable, restart the backend with:
+
+```bash
+cd /var/www/mentorship-bot/backend
+pm2 restart mentorship-bot-backend --update-env
+```
 
 ## Build the Frontend
 
