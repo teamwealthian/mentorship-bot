@@ -9,7 +9,7 @@ const credentials = [
 
 const socialLinks = ['LinkedIn', 'Twitter / X', 'Facebook', 'Instagram', 'Quora']
 
-function MentorSidebar() {
+function MentorSidebar({ courseTitle }) {
   return (
     <aside className="hidden w-full max-w-[290px] flex-col bg-slate-950 px-8 py-10 text-white lg:flex">
       <div className="flex flex-col items-center border-b border-white/10 pb-8 text-center">
@@ -53,8 +53,19 @@ function MentorSidebar() {
         </div>
       </div>
 
-      <div className="mt-auto rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-slate-400">
-        Profit is a by-product. Logic, neutrality, and discipline come first.
+      <div className="mt-auto space-y-4">
+        {courseTitle ? (
+          <div className="rounded-2xl border border-amber-200/20 bg-amber-300/10 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-amber-200/70">
+              Featured Course
+            </p>
+            <p className="mt-3 text-sm leading-6 text-amber-50">{courseTitle}</p>
+          </div>
+        ) : null}
+
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-xs leading-6 text-slate-400">
+          Profit is a by-product. Logic, neutrality, and discipline come first.
+        </div>
       </div>
     </aside>
   )

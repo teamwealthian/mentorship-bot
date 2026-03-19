@@ -2,7 +2,7 @@ function ChatMessage({ role, content }) {
   const isAssistant = role === 'assistant'
 
   return (
-    <div className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
+    <div className={`chat-message-enter flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
       <div
         className={`max-w-[85%] rounded-[20px] px-4 py-3 text-sm leading-6 shadow-sm sm:max-w-[70%] ${
           isAssistant

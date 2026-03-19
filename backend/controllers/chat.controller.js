@@ -54,6 +54,7 @@ const postChat = asyncHandler(async (req, res) => {
     data: {
       userMessage: message.trim(),
       assistantMessage: result.reply,
+      assistantMessages: result.replyMessages,
       usage: result.usage
     }
   });
